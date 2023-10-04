@@ -1,0 +1,22 @@
+pipeline {
+  agent any
+  tools {
+    maven 'mymaven' 
+  }
+  stages {
+    stage ('Scan and Build') {
+      steps {
+      withSonarQubeEnv(installationName: 'mysonarqube', credentialsId: 'sonarqube-jen') {
+        sh 'mvn clean package sonar:sonar'
+}
+      }
+    }
+    stage ('Deploy') {
+      steps {
+        sshagent(['jenkins_techports']) {
+          sh "scp -o StrictHostKeyChecking=no target/*.war techports@52.90.36.203:/home/techports/tomcat/webapps" 
+}
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+pipeline {
+  agent any
+  tools {
+    maven 'mymaven' 
+  }
+  stages {
+    stage ('Scan and Build') {
+      steps {
+      withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar-jen') {
+        sh 'mvn clean package sonar:sonar'
+      }
+    }
+    }
+   stage ('deploy') {
+      steps {
+        sshagent(['ansadmin_jen']) {
+          sh "scp -o StrictHostKeyChecking=no target/*.war ansadmin@50.19.153.249:/home/ansadmin/tomcat/webapps"
+      }
+    }  
+  }
+}
+}
